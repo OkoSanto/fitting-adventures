@@ -36,3 +36,6 @@ GSLVector::~GSLVector() {
   gsl_vector_free(self);
 }
 
+const gsl_vector *GSLVector::getVector() {
+  return self;
+}

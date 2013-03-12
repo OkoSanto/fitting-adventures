@@ -16,9 +16,9 @@ public:
   ~Solver();
   void init();
   void solve();
-  //private:
+private:
+  GSLVector initialParams;
   gsl_multifit_fdfsolver *pSolver;
-  const gsl_multifit_fdfsolver_type *type;
   gsl_multifit_function_fdf gslMultifit;
 };
 
@@ -29,7 +29,6 @@ void Solver<C>::solve() {
   do {
     iter++;
     status = gsl_multifit_fdfsolver_iterate(pSolver);
-    cout << "status" << gsl_strerror(status) << endl;
     if(status)
       break;
     status = gsl_multifit_test_delta(pSolver->dx, pSolver->x, 1e-4, 1e-4);
@@ -76,10 +75,9 @@ gsl_multifit_function_fdf get_gsl_multifit_proto() {
 // test: fit linear functions at 10 points with 2 params
 template<class Function>
 Solver<Function>::Solver(Function f) : Function(f),
-                             type(gsl_multifit_fdfsolver_lmsder) {
-  cout << "solver_alloc" << f.nPoints << "points, " << f.nParams << "params." << endl;
-  pSolver = gsl_multifit_fdfsolver_alloc(type , f.nPoints, f.nParams);
-  this->init();
+                                       initialParams(this->nParams) {
+  cout << "solver_alloc" << this->nPoints << "points, " << this->nParams << "params." << endl;
+  pSolver = gsl_multifit_fdfsolver_alloc( gsl_multifit_fdfsolver_lmsder, this->nPoints, this->nParams);
 }
 
 template<class Function>
@@ -88,7 +86,8 @@ void Solver<Function>::init() {
   gslMultifit.n = this->nPoints;
   gslMultifit.p = this->nParams;
   gslMultifit.params = this;
-  gsl_multifit_fdfsolver_set(pSolver, &gslMultifit, this->initialParams.self); // todo: initial params
+  cout << "gsl_multifit_fdfsolver_set" << endl;
+  gsl_multifit_fdfsolver_set(pSolver, &gslMultifit, this->initialParams.getVector());
 }
 
 template <class Function>

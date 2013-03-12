@@ -6,14 +6,12 @@ using std::vector; using std::cout; using std::endl;
 
 LinFunction::LinFunction(const vector<double>& x, const vector<double>& y) :
   nPoints(x.size()),
-  initialParams({0.,0.}),
   coords(x),
   y(y) {
 }
 
 LinFunction::LinFunction(size_t nPoints) :
   nPoints(nPoints), 
-  initialParams({0., 0.}),  // todo: somehow initialize with double * to avoid unnecessary object creation ?
   coords(1.,10.,nPoints),
   y(nPoints) {
   cout << "coords.length: " << coords.self->size <<endl;

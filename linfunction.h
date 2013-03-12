@@ -15,10 +15,9 @@ public:
   int f(const gsl_vector *X, gsl_vector *f);
   int df(const gsl_vector *X, gsl_matrix *J);
   void setY(const std::vector<double>& yVals);
+protected:
   size_t nPoints;
   const static size_t nParams = 2;
-  //protected:
-  GSLVector initialParams; // todo: better ownership?
   GSLVector coords;
   GSLVector y;
 };

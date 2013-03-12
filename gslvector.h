@@ -12,6 +12,8 @@ public:
   GSLVector(size_t length);
   GSLVector(const GSLVector&);
   ~GSLVector();
+  const gsl_vector *getVector(void);
+private:
   gsl_vector *self;
 };
 
