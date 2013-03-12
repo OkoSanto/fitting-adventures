@@ -1,8 +1,10 @@
 LDLIBS = -lgsl -lgslcblas
 CXXFLAGS = -g -Wall -std=c++0x -pedantic
 
-main: linfunction.o solver.o gslvector.o main.cpp
+main: linfunction.o gslvector.o main.cpp
 
-solver.o: solver.h
+main.cpp: solver.h
+	touch main.cpp
+
 gslvector.o: gslvector.h
 linfunction.o: linfunction.h
