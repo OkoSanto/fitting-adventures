@@ -1,20 +1,20 @@
-#include "vector.h"
+#include "gslvector.h"
 
 #include <cstring>
 
 using std::vector;
 
-Vector::Vector(double *elements, size_t length){
+GSLVector::GSLVector(double *elements, size_t length){
   self = gsl_vector_alloc(length);
   memcpy(self->data, elements, length * sizeof(*(self->data)));
 }
 
-Vector::Vector(vector<double> v) {
+GSLVector::GSLVector(vector<double> v) {
   self = gsl_vector_alloc(v.size());
   memcpy(self->data, &v[0], v.size() * sizeof(*(self->data)));
 }
 
-Vector::Vector(double start, double end, size_t length) {
+GSLVector::GSLVector(double start, double end, size_t length) {
   self = gsl_vector_alloc(length);
   double step = (end-start)/(length-1);
   for(size_t i=0; i<length; ++i) {
@@ -22,12 +22,17 @@ Vector::Vector(double start, double end, size_t length) {
   }
 }
 
-Vector::Vector(size_t length) {
+GSLVector::GSLVector(size_t length) {
   self = gsl_vector_alloc(length);
   gsl_vector_set_zero(self);
 }
 
-Vector::~Vector() {
+GSLVector::GSLVector(const GSLVector&other) {
+  self = gsl_vector_alloc(other.self->size);
+  gsl_vector_memcpy(self, other.self);
+}
+
+GSLVector::~GSLVector() {
   gsl_vector_free(self);
 }
 

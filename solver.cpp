@@ -5,8 +5,9 @@
 #include <vector>
 
 using std::vector; using std::cout; using std::endl;
-
-void Solver::solve() {
+/*
+template<class C>
+void Solver<C>::solve() {
   int status=0;
   size_t iter=0;
   do {
@@ -24,37 +25,19 @@ void Solver::solve() {
   
 }
 
-/* f = a*x_i + b, b = X[0], a=X[1] */
-int Solver::f(const gsl_vector *X, gsl_vector *f) {
-  cout <<  "Solver::f" << endl;
-  gsl_vector_memcpy(f, coords.self); // f = x
-  gsl_vector_scale(f, gsl_vector_get(X,1));
-  gsl_vector_add_constant(f, gsl_vector_get(X,0));
-  gsl_vector_sub(f, y.self);
-  for(size_t i=0; i<nPoints; ++i) {
-    cout << f->data[i] << endl;
-  }
-  return GSL_SUCCESS;
-}
-
-int Solver::df(const gsl_vector *X, gsl_matrix *J) {
-  cout <<  "Solver::df" << endl;
-  /* J_ij = df_i/dX_j. -> J_i0 = 1 J_i1 = x_i, */
-  gsl_matrix_set_all(J, 1.);
-  gsl_matrix_set_col(J, 1, coords.self);
-  return GSL_SUCCESS;
-}
-
+template<class C>
 int gsl_f(const gsl_vector *X, void *solver, gsl_vector *f) {
-  return ((Solver*)solver)->f(X, f);
+  return ((Solver<C>*)solver)->f(X, f);
 }
 
+template<class C>
 int gsl_df(const gsl_vector *X, void *solver, gsl_matrix *J) { 
-  return ((Solver*)solver)->df(X, J);
+  return ((Solver<C>*)solver)->df(X, J);
 }
 
+template<class C>
 int gsl_fdf(const gsl_vector *X, void *solver, gsl_vector *f, gsl_matrix *J) {
-  Solver *s=(Solver *)solver;
+  Solver<C> *s=(Solver<C> *)solver;
   int rc = s->f(X,f);
   if (rc != GSL_SUCCESS) {
     return rc;
@@ -63,44 +46,40 @@ int gsl_fdf(const gsl_vector *X, void *solver, gsl_vector *f, gsl_matrix *J) {
   return rc;
 }
 
-gsl_multifit_function_fdf gsl_multifit_proto = {
-  &gsl_f,
-  &gsl_df,
-  &gsl_fdf,
-  0,
-  0,
-  NULL
-};
+template<class C>
+gsl_multifit_function_fdf get_gsl_multifit_proto() {
+  gsl_multifit_function_fdf result = {
+    &gsl_f<C>,
+    &gsl_df<C>,
+    &gsl_fdf<C>,
+    0,
+    0,
+    NULL
+  };
+  return result;
+}
 
 // test: fit linear functions at 10 points with 2 params
-Solver::Solver() : type(gsl_multifit_fdfsolver_lmsder),
-                   nPoints(10),
-                   nParams(2),
-                   initialParams({0.,0.}),
-                   coords(1.,10.,nPoints),
-                   y(nPoints) { // todo: somehow initialize with double * to avoid unnecessary object creation ?
+template<class Function>
+Solver<Function>::Solver(Function f) : Function(f),
+                             type(gsl_multifit_fdfsolver_lmsder) {
   cout << "solver_alloc" << endl;
-  for (size_t i=0; i<nPoints; ++i) {
-    y.self->data[i] = 5.*coords.self->data[i] + 3.;
-    //    cout << yVals[i] << endl;
-  }
-  pSolver = gsl_multifit_fdfsolver_alloc(type , nPoints, nParams);
+  pSolver = gsl_multifit_fdfsolver_alloc(type , f.nPoints, f.nParams);
   this->set();
 }
 
-void Solver::set() {
-  gslMultifit = gsl_multifit_proto;
-  gslMultifit.n = nPoints;
-  gslMultifit.p = nParams;
+template<class Function>
+void Solver<Function>::reset() {
+  gslMultifit = get_gsl_multifit_proto<Function>();
+  gslMultifit.n = this->nPoints;
+  gslMultifit.p = this->nParams;
   gslMultifit.params = this;
-  gsl_multifit_fdfsolver_set(pSolver, &gslMultifit, initialParams.self); // todo: initial params
+  gsl_multifit_fdfsolver_set(pSolver, &gslMultifit, this->initialParams.self); // todo: initial params
 }
 
-void Solver::setY(const vector<double>& yVals) {
-  memcpy(y.self->data, &yVals[0], yVals.size());  
-}
-
-Solver::~Solver() {
+template <class Function>
+Solver<Function>::~Solver() {
   cout << "solver_free" << endl;
   gsl_multifit_fdfsolver_free(pSolver);
 }
+*/
